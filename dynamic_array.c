@@ -4,14 +4,29 @@
 #include <string.h>
 #include <stdint.h>
 
-#define HERE printf("You need to implement this code HERE!")
+//#define HERE printf("You need to implement this code HERE!")
 
 // This should return an array with 0 entries, capable
 // of holding only 1 entry initially, but it ends up expanding
 // later on.
 DynamicIntArray *allocate_int_array(){
-  HERE;
-  return NULL;
+  // allocate array
+    DynamicIntArray *array = (DynamicIntArray *)malloc(sizeof(DynamicIntArray));
+    if (array == NULL) {
+        return NULL;
+    }//if error
+  
+  //initialize
+    array->elements = 0;
+    array->capacity = 1;
+
+    array->internal_array = (int *)malloc(array->capacity * sizeof(int));
+    if (array->internal_array == NULL) {
+        free(array);
+        return NULL;
+    }//if error
+
+    return array;
 }
 
 // This returns the element at the index.  Like Python lists
@@ -25,8 +40,11 @@ DynamicIntArray *allocate_int_array(){
 // (EG, what python does), but C does not support any
 // form of execption handling.
 int get_int(unsigned int index, DynamicIntArray *data){
-  HERE;
-  return 0;
+  if (present(index, data)) {
+        return data->internal_array[index];
+    } else {
+        return -1;
+    }
 }
 
 // Like get, but instead of returning the element it returns
@@ -44,15 +62,24 @@ int get_int(unsigned int index, DynamicIntArray *data){
 // called and the pointer is used, there is a subsequent
 // call to append()
 int *set_int(unsigned int index, DynamicIntArray *data){
-  HERE;
-  return 0;
+  if (present(index, data)) {
+        return &(data->internal_array[index]);
+    } else {
+        return NULL;
+    }
 }
 
-// This should free all the memory in the dynamic array,
-// both the array that stores the actual data and the
-// structure itself.
+
 void deallocate_int_array(DynamicIntArray *data){
-  HERE;
+  if (data == NULL) {
+        return;
+    }
+
+    if (data->internal_array != NULL) {
+        free(data->internal_array);
+    }
+
+    free(data);
 }
 
 // This should add on an element at the end, resizing the
@@ -66,13 +93,33 @@ void deallocate_int_array(DynamicIntArray *data){
 // array starts at size 1, doubles to size 2, then 4, then 8, and 
 // so on.
 void append(int element, DynamicIntArray *data){
-  HERE;
+  if (data == NULL) {
+        fprintf(stderr, "Error: DynamicIntArray is NULL.\n");
+        return;
+    }
+
+    if (data->elements >= data->capacity) {
+        unsigned int new_capacity = data->capacity * 2;
+        int *new_array = (int *)realloc(data->internal_array, new_capacity * sizeof(int));
+        if (new_array == NULL) {
+            return;
+        }//make sure have enough capacity
+
+        data->internal_array = new_array;
+        data->capacity = new_capacity;
+    }
+
+    // Add new element
+    data->internal_array[data->elements] = element;
+    data->elements += 1;
 }
 
 // A boolean test on "is the index in the range of the array".
 // Hint, you probably want to use this for both get_int and set_int
 // to keep your checks in one place.
 bool present(unsigned int index, DynamicIntArray *data){
-  HERE;
-  return false;
+  if (data == NULL) {
+        return false;
+    }
+    return index < data->elements;
 }
